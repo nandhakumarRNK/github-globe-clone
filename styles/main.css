@@ -1,0 +1,34 @@
+html {
+  width: 100%;
+  height: 100%;
+  background-color: #040d22;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  color: white;
+}
+
+.mainDiv {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #040d22;
+  height: 100%;
+}
+
+#globe-container {
+  height: 100%;
+  background-color: #040d22;
+}
+
+/* .title {
+  font-size: 4vw;
+  margin-bottom: 2vw;
+}
+
+.description {
+  font-size: 2vw;
+  color: #8193b2 !important;
+} */
