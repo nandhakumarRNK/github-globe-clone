@@ -1,13 +1,13 @@
-const path = require('path')
-const { CleanWebpackPlugin } = require('clean-webpack-plugin')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-const CopyPlugin = require("copy-webpack-plugin")
+const path = require("path");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
-  entry: './src/main.js',
+  entry: "./src/main.js",
   output: {
-    filename: '[name].[contenthash].js',
-    path: path.resolve(__dirname, 'dist')
+    filename: "[name].[contenthash].js",
+    path: path.resolve(__dirname, "dist"),
   },
   plugins: [
     new CleanWebpackPlugin(),
@@ -15,14 +15,14 @@ module.exports = {
       patterns: [
         {
           from: "static",
-          to: "static"
+          to: "static",
         },
       ],
     }),
     new HtmlWebpackPlugin({
-      filename: 'index.html',
+      filename: "index.html",
       inject: true,
-      template: path.resolve(__dirname, 'index.html'),
+      template: path.resolve(__dirname, "index.html"),
     }),
   ],
   module: {
@@ -31,9 +31,9 @@ module.exports = {
         test: /\.(js|jsx)$/,
         exclude: /[\\/]node_modules[\\/]/,
         use: {
-          loader: 'babel-loader',
+          loader: "babel-loader",
         },
       },
-    ]
-  }
-}
+    ],
+  },
+};
