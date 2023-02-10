@@ -1,12 +1,12 @@
-import { createCamera } from './components/camera';
-import { createRenderer } from './systems/renderer';
-import { createScene } from './components/scene';
-import { Loop } from './systems/loop';
-import { createControls } from './systems/controls';
-import { createLights } from './components/lights';
-import { Resizer } from './systems/resizer';
-import { Globe } from './components/globe';
-import { pointOfView } from './systems/utils';
+import { createCamera } from "./components/camera";
+import { createRenderer } from "./systems/renderer";
+import { createScene } from "./components/scene";
+import { Loop } from "./systems/loop";
+import { createControls } from "./systems/controls";
+import { createLights } from "./components/lights";
+import { Resizer } from "./systems/resizer";
+import { Globe } from "./components/globe";
+import { pointOfView } from "./systems/utils";
 
 let camera;
 let controls;
@@ -16,43 +16,49 @@ let loop;
 let globe;
 
 class World {
-    constructor(container) {
-        renderer = createRenderer();
-        scene = createScene();
-        camera = createCamera();
-        
-        loop = new Loop(camera, scene, renderer);
-        controls = createControls(camera, renderer.domElement);
-        controls.update();
-        loop.updatables.push(controls);
+  constructor(container) {
+    renderer = createRenderer();
+    scene = createScene();
+    camera = createCamera();
 
-        const { ambientLight, dLight, dLight1, dLight2 } = createLights();
-        camera.add(ambientLight, dLight, dLight1, dLight2);
+    loop = new Loop(camera, scene, renderer);
+    controls = createControls(camera, renderer.domElement);
+    controls.update();
+    loop.updatables.push(controls);
 
-        globe = new Globe();
-        globe.init();
-        loop.updatables.push(globe.instance);
+    const { ambientLight, dLight, dLight1, dLight2 } = createLights();
+    camera.add(ambientLight, dLight, dLight1, dLight2);
 
-        scene.add(camera, globe.instance);
+    globe = new Globe();
+    globe.init();
+    loop.updatables.push(globe.instance);
 
-        pointOfView(camera, controls, globe.instance, { lat: 22.3193, lng: 114.1694 }, 1000); // China HongKong
+    scene.add(camera, globe.instance);
 
-        const resizer = new Resizer(camera, renderer);
+    pointOfView(
+      camera,
+      controls,
+      globe.instance,
+      { lat: 22.3193, lng: 114.1694 },
+      1000
+    ); // China HongKong
 
-        container.append(renderer.domElement);
-    }
+    const resizer = new Resizer(camera, renderer);
 
-    render() {
-        renderer.render(scene, camera);
-    }
+    container.append(renderer.domElement);
+  }
 
-    start() {
-        loop.start();
-    }
+  render() {
+    renderer.render(scene, camera);
+  }
 
-    stop() {
-        loop.stop();
-    }
+  start() {
+    loop.start();
+  }
+
+  stop() {
+    loop.stop();
+  }
 }
 
 export { World };
