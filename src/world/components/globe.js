@@ -3,6 +3,9 @@ import countries from "../assets/globe-min.json";
 import arcsData from "../assets/arcs-data.json";
 import { hexToRgb, genRandomNumbers } from "../systems/utils";
 import { Color } from "three";
+import { Raycaster, Vector2 } from 'three';
+import { PerspectiveCamera } from 'three';
+
 
 const ARC_REL_LEN = 0.9; // relative to whole arc
 const FLIGHT_TIME = 2000;
@@ -25,12 +28,39 @@ class Globe {
     this._buildData();
     this._buildMaterial();
 
+    this.camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    this.camera.position.z = 5; // Adjust as needed
+    this.camera.lookAt(this.instance.position);
+
+    this.raycaster = new Raycaster();
+    this.mouse = new Vector2();
+
     this.instance.tick = (delta) => this.tick(delta);
+    window.addEventListener('click', (event) => this._onMouseClick(event), false);
+
   }
 
-  init() {
+  async init() {
+    await this._buildData();
     this.initCountries(1000);
     this.initAnimationData(1000);
+  }
+
+  _onMouseClick(event) {
+    event.preventDefault();
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+
+    this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+
+    const intersects = this.raycaster.intersectObjects(this.instance.children);
+
+    if (intersects.length > 0) {
+      const pointData = intersects[0].object.userData;
+      this._onPointClick(pointData);
+    }
   }
 
   initCountries(delay) {
@@ -97,33 +127,33 @@ class Globe {
     }
   }
 
-  _buildData() {
-    const arcs = arcsData.flights;
+  async _buildData() {
     let points = [];
-    for (let i = 0; i < arcs.length; i++) {
-      const arc = arcs[i];
-      const rgb = hexToRgb(arc.color);
-      points.push({
-        size: 1.0,
-        order: arc.order,
-        color: (t) => `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${1 - t})`,
-        label: arc.from,
-        lat: arc.startLat,
-        lng: arc.startLng,
-      });
-      points.push({
-        size: 1.0,
-        order: arc.order,
-        color: (t) => `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${1 - t})`,
-        label: arc.to,
-        lat: arc.endLat,
-        lng: arc.endLng,
-      });
+    try {
+      // Fetch data from API
+      const response = await fetch('https://api.reliefweb.int/v1/disasters?appname=rw-user-0&profile=full&preset=latest&slim=0&limit=1');
+      const data = await response.json();
+      const arcs = data.data; // get the 'data' array from the response
+
+      for (let i = 0; i < arcs.length; i++) {
+        const arc = arcs[i];
+        const rgb = hexToRgb('#62DAFF'); // use a fixed color for now
+        points.push({
+          size: 1.0,
+          order: i, // use the index as the order
+          color: (t) => `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${1 - t})`,
+          label: arc.fields.primary_country.name,
+          lat: arc.fields.primary_country.location.lat,
+          lng: arc.fields.primary_country.location.lon,
+        });
+      }
+      this.pointsData = points.filter(
+        (v, i, a) =>
+          a.findIndex((v2) => ["lat", "lng"].every((k) => v2[k] === v[k])) === i
+      );
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
     }
-    this.pointsData = points.filter(
-      (v, i, a) =>
-        a.findIndex((v2) => ["lat", "lng"].every((k) => v2[k] === v[k])) === i
-    );
   }
 
   _buildMaterial() {
